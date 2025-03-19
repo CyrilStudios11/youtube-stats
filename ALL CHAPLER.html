@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Stats</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .video-container { margin: 20px auto; width: 50%; border: 1px solid #ddd; padding: 10px; border-radius: 8px; padding: 10px; }
+        .video-title { font-size: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>YouTube Video Performance (Sorted by Views)</h2>
+
+    <div id="videos"></div>
+
+    <script>
+        const API_KEY = 'AIzaSyBHsZqzss0-YOzd9j029VQzzVy9bCebabE'; // Replace with your API key
+        const videoIds = [
+            "NT0Bfyr-Mvg", "_v5guYMZjjY", "6Kh0KInP2vo", "W2UZ-DP89IU", "lB2ugoz4U-4", "hfV0BAZasRE",
+            "weFOPhUlZOg", "jARp7dNndzs", "woE0vw2bB7Y", "DnGyv8m70G0", "hMkbum9vgeA", "MfGED9Kc2jU",
+            "i9ZSb0MGT6A", "Ie0TF2rn3CU", "WBdJPOKWVJQ", "H--FRcCEFoA"
+        ];
+
+        async function fetchVideoStats() {
+            const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds.join(",")}&key=${API_KEY}`;
+            
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+
+                let videosArray = data.items.map(video => ({
+                    title: video.snippet.title,
+                    views: parseInt(video.statistics.viewCount),
+                    likes: video.statistics.likeCount,
+                    videoId: video.id
+                }));
+
+                // Sort videos by views (highest to lowest)
+                videosArray.sort((a, b) => b.views - a.views);
+
+                document.getElementById("videos").innerHTML = ""; // Clear previous content
+
+                videosArray.forEach(video => {
+                    document.getElementById("videos").innerHTML += `
+                        <div class="video-container">
+                            <p class="video-title">${video.title}</p>
+                            <iframe width="100%" height="200" src="https://www.youtube.com/embed/${video.videoId}" frameborder="0" allowfullscreen></iframe>
+                            <p>Views: ${video.views.toLocaleString()} | Likes: ${video.likes.toLocaleString()}</p>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error fetching video stats:", error);
+            }
+        }
+
+        fetchVideoStats();
+        setInterval(fetchVideoStats, 24 * 60 * 60 * 1000); // Refresh every 24 hours
+
+    </script>
+</body>
+</html>
